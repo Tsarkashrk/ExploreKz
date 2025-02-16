@@ -1,0 +1,12 @@
+
+node_modules/
+dist/
+build/
+.next
+.qodo
+.env
+
+# Игнорировать все файлы с определённым расширением
+*.log
+*.tmp
+*.bak
