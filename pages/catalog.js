@@ -76,7 +76,7 @@ const CatalogPage = () => {
         <AuthNav user={user} />
         <div style={{ display: 'flex', padding: '20px', gap: '20px' }}>
           {exampleData.map((item) => (
-            <Link href={`/catalog/${item.id}/${item.id}`} style={{ border: '1px solid gray', borderRadius: '15px', padding: '20px' }}>
+            <Link href={`/catalog/${item.id}`} style={{ border: '1px solid gray', borderRadius: '15px', padding: '20px' }}>
               {item.title} {item?.img ? item.img : <img width={250} src="https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg" />}
             </Link>
           ))}

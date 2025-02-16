@@ -40,6 +40,17 @@ const exampleData = [
   },
 ]
 
+const item = {
+  id: 1,
+  title: 'First Event In Qazaqstan',
+  date: '19.05.2025',
+  time: '19:00',
+  description: 'First CS2 Tournament in Qazaqstan',
+  price: '19000KZT',
+  hint: 'Some hints',
+  img: '',
+}
+
 const CatalogPage = () => {
   const router = useRouter()
   const [user, setUser] = useState({})
@@ -72,11 +83,9 @@ const CatalogPage = () => {
       <main className="relative w-full">
         <AuthNav user={user} />
         <div style={{ display: 'flex', padding: '20px', gap: '20px' }}>
-          {exampleData.map((item) => (
-            <Link href={`/catalog/${item.id}/${item.id}`} style={{ border: '1px solid gray', borderRadius: '15px', padding: '20px' }}>
-              {item.title} {item?.img ? item.img : <img width={250} src="https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg" />}
-            </Link>
-          ))}
+          <Link href={`/catalog/${item.id}`} style={{ border: '1px solid gray', borderRadius: '15px', padding: '20px' }}>
+            {item.title} {item?.img ? item.img : <img width={250} src="https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg" />}
+          </Link>
         </div>
       </main>
     </div>
