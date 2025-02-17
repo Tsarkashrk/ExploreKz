@@ -23,7 +23,7 @@ const AuthNav = ({ user }) => {
       </Link>
       <div className="md:flex hidden items-center justify-between">
         <Link href={'/dashboard'} className="mr-4 text-gray-400 hover:text-black">
-          {user['email']?.substring(0, 6)}
+          {user?.email}
         </Link>
 
         <button className="mr-4 text-[#9E6F21] text-medium hover:text-black" onClick={signOut}>
@@ -41,7 +41,7 @@ const AuthNav = ({ user }) => {
           <div className="flex w-full flex-col space-y-8">
             <div className="flex items-center space-x-3 text-white hover:text-[#C07F00]">
               <FaUserAlt />
-              <p>{user['email']?.substring(0, 6)}</p>
+              <p>{user?.email}</p>
             </div>
             <Link href="/" className="hover:text-white text-[#C07F00]" onClick={signOut}>
               Sign Out

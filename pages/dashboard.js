@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import Head from 'next/head'
 import AuthNav from '../components/AuthNav'
+import { eventService } from '../utils/event.service'
 import NoEvent from '../components/NoEvent'
 import Events from '../components/Events'
 import { useRouter } from 'next/router'
@@ -16,26 +17,56 @@ const dashboard = () => {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const isUserLoggedIn = useCallback(() => {
-    // onAuthStateChanged(auth, (user) => {
-    // 	if (user) {
-    // 		setUser({ email: user.email, uid: user.uid });
-    // 		getEvents(user.uid, setEvents, setLoading);
-    // 	} else {
-    // 		return router.push("/register");
-    // 	}
-    // });
+  const isUserLoggedIn = async () => {
     try {
-      setUser(userService.me())
+      const response = await userService.me()
+      setUser(response.data)
       setLoading(false)
     } catch (error) {
-      return router.push('/register')
+      console.error('Error fetching user:', error)
+      router.push('/register')
     }
-  }, [])
+  }
+
+  const checkImageExists = async (url) => {
+    try {
+      const response = await fetch(url, { method: 'HEAD' })
+      return response.ok
+    } catch {
+      return false
+    }
+  }
+
+  const fetchEvents = async () => {
+    try {
+      const response = await eventService.getAllEvents()
+      setEvents(response.data)
+
+      const imageChecks = await Promise.all(
+        response.data.map(async (item) => {
+          if (item?.image_url) {
+            return { id: item.id, exists: await checkImageExists(item.image_url) }
+          }
+          return { id: item.id, exists: false }
+        }),
+      )
+
+      const imageMap = imageChecks.reduce((acc, { id, exists }) => {
+        acc[id] = exists
+        return acc
+      }, {})
+
+      setValidImages(imageMap)
+    } catch (error) {
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
+    fetchEvents()
     isUserLoggedIn()
-  }, [isUserLoggedIn])
+  }, [])
 
   if (loading) return <Loading title="Your dashboard is almost ready.🍚" />
   return (

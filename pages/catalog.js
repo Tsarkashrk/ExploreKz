@@ -1,54 +1,73 @@
 import AuthNav from '../components/AuthNav'
 import { useRouter } from 'next/router'
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState } from 'react'
 import Head from 'next/head'
-import NoEvent from '../components/NoEvent'
-import Events from '../components/Events'
-import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../utils/firebase'
-import { getAllEvents } from '../utils/util'
+import { CiLocationOn, CiMoneyBill, CiCalendarDate } from 'react-icons/ci'
 import Loading from '../components/Loading'
 import Link from 'next/link'
 import Nav from '../components/Nav'
-
-const exampleData = [
-  {
-    id: 1,
-    title: 'First Event In Qazaqstan',
-    date: '19.05.2025',
-    time: '19:00',
-    description: 'First CS2 Tournament in Qazaqstan',
-    price: '19000KZT',
-    hint: 'Some hints',
-    img: '',
-  },
-  {
-    id: 2,
-    title: 'Second Event In Qazaqstan',
-    date: '19.05.2025',
-    time: '19:00',
-    description: 'First CS2 Tournament in Qazaqstan',
-    hint: 'Some hints',
-    price: '19000KZT',
-    img: '',
-  },
-  {
-    id: 3,
-    title: 'Third Event In Qazaqstan',
-    date: '19.05.2025',
-    time: '19:00',
-    description: 'First CS2 Tournament in Qazaqstan',
-    hint: 'Some hints',
-    price: '19000KZT',
-    img: '',
-  },
-]
+import { userService } from '../utils/user.service'
+import { eventService } from '../utils/event.service'
 
 const CatalogPage = () => {
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [validImages, setValidImages] = useState({})
+
+  const checkImageExists = async (url) => {
+    try {
+      const response = await fetch(url, { method: 'HEAD' })
+      return response.ok
+    } catch {
+      return false
+    }
+  }
+
+  const fetchEvents = async () => {
+    try {
+      const response = await eventService.getAllEvents()
+      setEvents(response.data)
+
+      const imageChecks = await Promise.all(
+        response.data.map(async (item) => {
+          if (item?.image_url) {
+            return { id: item.id, exists: await checkImageExists(item.image_url) }
+          }
+          return { id: item.id, exists: false }
+        }),
+      )
+
+      const imageMap = imageChecks.reduce((acc, { id, exists }) => {
+        acc[id] = exists
+        return acc
+      }, {})
+
+      setValidImages(imageMap)
+    } catch (error) {
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const isUserLoggedIn = async () => {
+    try {
+      const response = await userService.me()
+      setUser(response.data)
+      setLoading(false)
+      console.log('asd')
+    } catch (error) {
+      console.error('sdf')
+    }
+  }
+
+  useEffect(() => {
+    fetchEvents()
+    isUserLoggedIn()
+  }, [])
+
+  if (loading) return <Loading />
 
   return (
     <div>
@@ -60,15 +79,54 @@ const CatalogPage = () => {
       </Head>
       <main className="relative w-full">
         {user ? <AuthNav user={user} /> : <Nav />}
-        <div style={{ display: 'flex', padding: '20px', gap: '20px' }}>
-          {exampleData.map((item) => (
-            <Link href={`/catalog/${item.id}`} style={{ display: 'felx', flexDirection: 'column', gap: '100px', border: '1px solid gray', borderRadius: '10px', padding: '10px' }}>
-              {item?.img ? item.img : <img width={250} style={{ borderRadius: '5px' }} src={item?.img ? item.img : `https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg`} />}
-              <b>{item.title}</b>
-            </Link>
-          ))}
-        </div>
+        <div style={{ display: 'flex', padding: '20px', gap: '20px', flexWrap: 'wrap' }}>{events.length > 0 ? events.map((item) => <CatalogItem key={item.id} item={item} validImages={validImages} />) : <p>No events available</p>}</div>
       </main>
+    </div>
+  )
+}
+
+const CatalogItem = ({ item, validImages }) => {
+  if (!item) return null
+
+  const formattedDate = item.date
+    ? new Date(item.date).toLocaleString('en-EN', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : 'Unknown date'
+
+  const imageSrc = validImages[item.id] ? item.image_url : 'https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg'
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        border: '1px solid #e5e7eb',
+        borderRadius: '15px',
+        padding: '10px',
+        maxWidth: '280px',
+        textDecoration: 'none',
+        color: 'inherit',
+      }}>
+      <img width="100%" style={{ borderRadius: '5px' }} src={imageSrc} alt={item.title} />
+      <b>{item.title}</b>
+      <p style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <CiLocationOn /> {item.venue}
+      </p>
+      <p style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <CiCalendarDate /> {formattedDate}
+      </p>
+      <p style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <CiMoneyBill /> {item.price}
+      </p>
+      <Link href={`/catalog/${item.id}`} style={{ backgroundColor: 'orange', color: 'white', padding: '5px', textAlign: 'center', borderRadius: '5px' }}>
+        Details
+      </Link>
     </div>
   )
 }

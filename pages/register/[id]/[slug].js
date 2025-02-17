@@ -2,14 +2,16 @@ import React, { useState } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 import { FaUserAlt } from 'react-icons/fa'
+import { useRouter } from 'next/router'
 import { HiMail } from 'react-icons/hi'
 import { doc, getDoc } from '@firebase/firestore'
 import db from '../../../utils/firebase'
 import { registerAttendee } from '../../../utils/util'
-import { useRouter } from 'next/router'
 import RegClosed from '../../../components/RegClosed'
 import ErrorPage from '../../../components/ErrorPage'
+import { eventService } from '../../../utils/event.service'
 import Loading from '../../../components/Loading'
+import { useEffect } from 'react'
 
 export async function getServerSideProps(context) {
   const docRef = doc(db, 'events', context.query.id)
@@ -25,16 +27,38 @@ export async function getServerSideProps(context) {
   }
 }
 
-const RegisterPage = ({ event }) => {
+const RegisterPage = () => {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [event, setEvent] = useState('')
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const { query } = useRouter()
 
+  const router = useRouter()
+  console.log(router)
+
+  const slug = router.query.slug
+  const id = router.query.id
+
+  const fetchEvent = async () => {
+    try {
+      const response = await eventService.getEventById(id)
+      setEvent(response.data)
+    } catch (error) {
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchEvent()
+  }, [])
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    registerAttendee(name, email, query.id, setSuccess, setLoading)
+    setLoading(true)
+    eventService.registerEvent({ event_id: event.id, email }).then((response) => setLoading(false), setSuccess(true), router.push('/'))
     setEmail('')
     setName('')
   }
@@ -45,7 +69,7 @@ const RegisterPage = ({ event }) => {
     return <ErrorPage />
   }
 
-  if (event.disableRegistration) {
+  if (!event.is_active) {
     return <RegClosed event={event} />
   }
 
@@ -70,6 +94,21 @@ const RegisterPage = ({ event }) => {
             <label htmlFor="email">Email address</label>
             <div className="w-full relative">
               <input type="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} className="border px-10 py-2 mb-3 rounded-md w-full" required />
+              <HiMail className=" absolute left-4 top-3 text-gray-300 text-xl" />
+            </div>
+            <label htmlFor="nums">Card numbers</label>
+            <div className="w-full relative">
+              <input type="text" name="nums" className="border px-10 py-2 mb-3 rounded-md w-full" required />
+              <HiMail className=" absolute left-4 top-3 text-gray-300 text-xl" />
+            </div>
+            <label htmlFor="expires">Expires in</label>
+            <div className="w-full relative">
+              <input type="text" name="expires" className="border px-10 py-2 mb-3 rounded-md w-full" required />
+              <HiMail className=" absolute left-4 top-3 text-gray-300 text-xl" />
+            </div>
+            <label htmlFor="cvv">CVV</label>
+            <div className="w-full relative">
+              <input type="text" name="cvv" className="border px-10 py-2 mb-3 rounded-md w-full" required />
               <HiMail className=" absolute left-4 top-3 text-gray-300 text-xl" />
             </div>
             <button type="submit" className="bg-[#FFD95A] p-3 font-medium hover:bg-[#C07F00] hover:text-[#FFF8DE] mb-3 rounded-md">

@@ -10,7 +10,7 @@ export const eventService = {
   },
 
   async createEvent(data) {
-    const response = await axios.post(`${BASIC_ROUTE}/create`, data)  
+    const response = await axios.post(`${BASIC_ROUTE}/create`, data)
     return response
   },
 
@@ -22,5 +22,15 @@ export const eventService = {
   async editEvent(id, data) {
     const response = await axios.put(`${BASIC_ROUTE}/update?id=${id}`, data)
     return response
-  }
+  },
+
+  async deleteEvent(id) {
+    const response = await axios.put(`${BASIC_ROUTE}/delete?id=${id}`)
+    return response
+  },
+
+  async registerEvent(data) {
+    const response = await axios.post(`${BASIC_ROUTE}/register`, data)
+    return response
+  },
 }
