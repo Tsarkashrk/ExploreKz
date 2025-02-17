@@ -7,39 +7,6 @@ import { auth } from '../../utils/firebase'
 import { getEvents } from '../../utils/util'
 import Link from 'next/link'
 
-const exampleData = [
-  {
-    id: 1,
-    title: 'First Event In Qazaqstan',
-    date: '19.05.2025',
-    time: '19:00',
-    description: 'First CS2 Tournament in Qazaqstan',
-    price: '19000KZT',
-    hint: 'Some hints',
-    img: '',
-  },
-  {
-    id: 2,
-    title: 'Second Event In Qazaqstan',
-    date: '19.05.2025',
-    time: '19:00',
-    description: 'First CS2 Tournament in Qazaqstan',
-    hint: 'Some hints',
-    price: '19000KZT',
-    img: '',
-  },
-  {
-    id: 3,
-    title: 'Third Event In Qazaqstan',
-    date: '19.05.2025',
-    time: '19:00',
-    description: 'First CS2 Tournament in Qazaqstan',
-    hint: 'Some hints',
-    price: '19000KZT',
-    img: '',
-  },
-]
-
 const item = {
   id: 1,
   title: 'First Event In Qazaqstan',

@@ -6,9 +6,10 @@ import NoEvent from '../components/NoEvent'
 import Events from '../components/Events'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../utils/firebase'
-import { getEvents } from '../utils/util'
+import { getAllEvents } from '../utils/util'
 import Loading from '../components/Loading'
 import Link from 'next/link'
+import Nav from '../components/Nav'
 
 const exampleData = [
   {
@@ -45,24 +46,9 @@ const exampleData = [
 
 const CatalogPage = () => {
   const router = useRouter()
-  const [user, setUser] = useState({})
+  const [user, setUser] = useState(null)
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
-
-  const isUserLoggedIn = useCallback(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser({ email: user.email, uid: user.uid })
-        getEvents(user.uid, setEvents, setLoading)
-      } else {
-        return router.push('/register')
-      }
-    })
-  }, [])
-
-  useEffect(() => {
-    isUserLoggedIn()
-  }, [isUserLoggedIn])
 
   return (
     <div>
@@ -73,11 +59,12 @@ const CatalogPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="relative w-full">
-        <AuthNav user={user} />
+        {user ? <AuthNav user={user} /> : <Nav />}
         <div style={{ display: 'flex', padding: '20px', gap: '20px' }}>
           {exampleData.map((item) => (
-            <Link href={`/catalog/${item.id}`} style={{ border: '1px solid gray', borderRadius: '15px', padding: '20px' }}>
-              {item.title} {item?.img ? item.img : <img width={250} src="https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg" />}
+            <Link href={`/catalog/${item.id}`} style={{ display: 'felx', flexDirection: 'column', gap: '100px', border: '1px solid gray', borderRadius: '10px', padding: '10px' }}>
+              {item?.img ? item.img : <img width={250} style={{ borderRadius: '5px' }} src={item?.img ? item.img : `https://coffective.com/wp-content/uploads/2018/06/default-featured-image.png.jpg`} />}
+              <b>{item.title}</b>
             </Link>
           ))}
         </div>
