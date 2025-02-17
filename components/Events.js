@@ -34,7 +34,7 @@ const Events = ({ events }) => {
       <div className="w-full flex flex-wrap items-center justify-center">
         {events.map((event) => (
           <div className="md:w-[450px] w-full hover:shadow border-[1px] rounded-2xl m-3" key={event.id}>
-            <div className="p-4 w-full cursor-pointer" onClick={() => handleRoute(event.data.slug, event.id)}>
+            <div className="p-4 w-full cursor-pointer" onClick={() => handleRoute(`event${event.id}`, event.id)}>
               <h2 className="text-xl font-medium mb-6">{event.title}</h2>
               <p className="opacity-80">{event.attendees.length > 0 ? `${event.attendees.length} people registered` : `No attendee yet`}</p>
               <p className="opacity-50">Time: {convertTo12HourFormat(event.time)}</p>
